@@ -6,9 +6,12 @@ function BookingPage({
   selectedSlot,
   setSelectedSlot,
   formData,
+  errors,
+  touchedFields,
   isFormValid,
   createLoading,
   handleChange,
+  handleBlur,
   handleSubmit,
 }) {
   if (!doctor) {
@@ -62,9 +65,15 @@ function BookingPage({
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder={t('placeholderName')}
-                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base outline-none ring-0 transition focus:border-brand-500"
+                className={`h-14 w-full rounded-2xl border bg-slate-50 px-4 text-base outline-none ring-0 transition focus:border-brand-500 ${
+                  touchedFields.name && errors.name ? 'border-rose-400' : 'border-slate-200'
+                }`}
               />
+              {touchedFields.name && errors.name ? (
+                <p className="mt-2 text-sm font-medium text-rose-500">{errors.name}</p>
+              ) : null}
             </label>
 
             <label className="block">
@@ -73,9 +82,17 @@ function BookingPage({
                 name="age"
                 value={formData.age}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                inputMode="numeric"
+                maxLength={3}
                 placeholder={t('placeholderAge')}
-                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base outline-none ring-0 transition focus:border-brand-500"
+                className={`h-14 w-full rounded-2xl border bg-slate-50 px-4 text-base outline-none ring-0 transition focus:border-brand-500 ${
+                  touchedFields.age && errors.age ? 'border-rose-400' : 'border-slate-200'
+                }`}
               />
+              {touchedFields.age && errors.age ? (
+                <p className="mt-2 text-sm font-medium text-rose-500">{errors.age}</p>
+              ) : null}
             </label>
 
             <label className="block">
@@ -84,9 +101,17 @@ function BookingPage({
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                inputMode="numeric"
+                maxLength={11}
                 placeholder={t('placeholderPhone')}
-                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base outline-none ring-0 transition focus:border-brand-500"
+                className={`h-14 w-full rounded-2xl border bg-slate-50 px-4 text-base outline-none ring-0 transition focus:border-brand-500 ${
+                  touchedFields.phone && errors.phone ? 'border-rose-400' : 'border-slate-200'
+                }`}
               />
+              {touchedFields.phone && errors.phone ? (
+                <p className="mt-2 text-sm font-medium text-rose-500">{errors.phone}</p>
+              ) : null}
             </label>
           </div>
         </div>
