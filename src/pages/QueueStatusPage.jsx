@@ -1,17 +1,7 @@
 import { Link } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
-import { useAppContext } from '../context/AppContext';
-import { useTranslation } from '../hooks/useTranslation';
 
-function QueueStatusPage() {
-  const { appointments, currentServingQueueNumber, currentUser } = useAppContext();
-  const { t } = useTranslation();
-
-  const latestAppointment =
-    [...appointments]
-      .reverse()
-      .find((appointment) => appointment.patientName === currentUser.name) || appointments[0];
-
+function QueueStatusPage({ latestAppointment, currentServingQueueNumber, t }) {
   if (!latestAppointment) {
     return (
       <section className="rounded-[28px] bg-white p-6 shadow-soft">

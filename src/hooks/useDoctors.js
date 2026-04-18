@@ -1,19 +1,17 @@
-import { useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
-import { fetchDoctors } from '../services/doctorService';
-import { useApi } from './useApi';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDoctors, getDoctorsSnapshot } from '../services/doctorService';
+import { queryKeys } from '../services/queryKeys';
 
 export function useDoctors() {
-  const { doctors } = useAppContext();
-  const { data, loading, error, request } = useApi(fetchDoctors);
-
-  useEffect(() => {
-    request();
-  }, [request]);
+  const { data = [], isLoading, error } = useQuery({
+    queryKey: queryKeys.doctors,
+    queryFn: fetchDoctors,
+    initialData: getDoctorsSnapshot,
+  });
 
   return {
-    doctors: data || doctors,
-    loading,
+    doctors: data,
+    loading: isLoading,
     error,
   };
 }

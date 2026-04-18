@@ -1,4 +1,4 @@
-export const initialDoctors = [
+const doctors = [
   {
     id: 'dr-khin',
     name: 'Dr. Khin Thida',
@@ -25,8 +25,19 @@ export const initialDoctors = [
   },
 ];
 
+function cloneDoctors() {
+  return doctors.map((doctor) => ({
+    ...doctor,
+    availableSlots: [...doctor.availableSlots],
+  }));
+}
+
+export function getDoctorsSnapshot() {
+  return cloneDoctors();
+}
+
 export async function fetchDoctors() {
   return new Promise((resolve) => {
-    setTimeout(() => resolve(initialDoctors), 250);
+    setTimeout(() => resolve(cloneDoctors()), 250);
   });
 }

@@ -1,30 +1,16 @@
-import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import TimeSlotPicker from '../components/TimeSlotPicker';
-import { useAppContext } from '../context/AppContext';
-import { useAppointments } from '../hooks/useAppointments';
-import { useTranslation } from '../hooks/useTranslation';
 
-function BookingPage() {
-  const { doctorId } = useParams();
-  const navigate = useNavigate();
-  const { currentUser, getDoctorById } = useAppContext();
-  const { createAppointment, createLoading } = useAppointments();
-  const { t } = useTranslation();
-  const doctor = getDoctorById(doctorId);
-
-  const [selectedSlot, setSelectedSlot] = useState(doctor?.availableSlots[0] || '');
-  const [formData, setFormData] = useState({
-    name: currentUser.name || '',
-    age: currentUser.age || '',
-    phone: currentUser.phone || '',
-  });
-
-  const isFormValid = useMemo(
-    () => selectedSlot && formData.name.trim() && formData.age.trim() && formData.phone.trim(),
-    [formData.age, formData.name, formData.phone, selectedSlot]
-  );
-
+function BookingPage({
+  doctor,
+  t,
+  selectedSlot,
+  setSelectedSlot,
+  formData,
+  isFormValid,
+  createLoading,
+  handleChange,
+  handleSubmit,
+}) {
   if (!doctor) {
     return (
       <section className="rounded-[28px] bg-white p-6 shadow-soft">
@@ -32,27 +18,6 @@ function BookingPage() {
       </section>
     );
   }
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((previous) => ({ ...previous, [name]: value }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!isFormValid) {
-      return;
-    }
-
-    await createAppointment({
-      user: formData,
-      doctor,
-      slot: selectedSlot,
-    });
-
-    navigate('/status');
-  };
 
   return (
     <form onSubmit={handleSubmit} className="pb-28">

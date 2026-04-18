@@ -1,17 +1,11 @@
 import { Link } from 'react-router-dom';
 import DoctorCard from '../components/DoctorCard';
-import { useDoctors } from '../hooks/useDoctors';
-import { useTranslation } from '../hooks/useTranslation';
 
-function HomePage() {
-  const { doctors, loading } = useDoctors();
-  const { t } = useTranslation();
-
+function HomePage({ doctors, loading, t }) {
   return (
     <section className="space-y-5">
       <div className="rounded-[28px] bg-brand-600 p-6 text-white shadow-soft">
         <p className="text-sm font-semibold text-sky-100">{t('welcome')}</p>
-        <h2 className="mt-2 text-3xl font-black">{t('clinicName')}</h2>
         <p className="mt-3 text-base leading-7 text-sky-50">{t('clinicIntro')}</p>
       </div>
 
