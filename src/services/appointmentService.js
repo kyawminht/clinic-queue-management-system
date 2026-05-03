@@ -95,15 +95,11 @@ export function getQueueSnapshot() {
 }
 
 export async function fetchQueueData(dateKey) {
-  try {
-    const query = dateKey ? `?date=${encodeURIComponent(dateKey)}` : '';
-    const response = await fetch(`${API_BASE_URL}/bookings/queue${query}`);
-    const queue = await parseApiResponse(response);
-    syncQueueState(queue);
-    return buildQueueSnapshot();
-  } catch (error) {
-    return buildQueueSnapshot();
-  }
+  const query = dateKey ? `?date=${encodeURIComponent(dateKey)}` : '';
+  const response = await fetch(`${API_BASE_URL}/bookings/queue${query}`);
+  const queue = await parseApiResponse(response);
+  syncQueueState(queue);
+  return buildQueueSnapshot();
 }
 
 export async function submitAppointment(payload) {

@@ -5,6 +5,8 @@ import { useAppContext } from '../context/AppContext';
 import { useAppointments } from '../hooks/useAppointments';
 import { useDoctors } from '../hooks/useDoctors';
 import { useTranslation } from '../hooks/useTranslation';
+import SubmissionProgress from '../components/SubmissionProgress';
+import { useAsyncBookingSubmission } from '../hooks/useAsyncBookingSubmission';
 
 const namePattern = /^[\p{L}\s.'-]{2,}$/u;
 const phonePattern = /^09\d{7,9}$/;
@@ -22,7 +24,8 @@ function BookingPageContainer() {
   const navigate = useNavigate();
   const { currentUser, setCurrentUser, selectedDate, setSelectedDate } = useAppContext();
   const { doctors } = useDoctors();
-  const { createAppointment, createLoading } = useAppointments();
+  const { createLoading } = useAppointments();
+  const { submit, formKey } = useAsyncBookingSubmission();
   const { t } = useTranslation();
   const doctor = doctors.find((item) => item.id === doctorId);
 
@@ -124,43 +127,43 @@ function BookingPageContainer() {
     };
 
     try {
-      await createAppointment({
+      const result = await submit({
         date: selectedDate,
         user: sanitizedFormData,
         doctor,
         slot: selectedSlot,
-      });
+      }, { title: sanitizedFormData.name });
 
       setCurrentUser(sanitizedFormData);
-      navigate('/status');
-    } catch (error) {
-      if (error?.code === 'ACTIVE_BOOKING_EXISTS') {
-        setCurrentUser(sanitizedFormData);
+      if (!result?.queued) {
         navigate('/status');
-      } else {
-        setSubmitError(error?.message || 'Request failed');
       }
+    } catch (error) {
+      setSubmitError(error?.message || 'Request failed');
     }
   };
 
   return (
-    <BookingPage
-      doctor={doctor}
-      t={t}
-      selectedDate={selectedDate}
-      setSelectedDate={setSelectedDate}
-      selectedSlot={selectedSlot}
-      setSelectedSlot={setSelectedSlot}
-      formData={formData}
-      errors={errors}
-      touchedFields={touchedFields}
-      isFormValid={isFormValid}
-      createLoading={createLoading}
-      submitError={submitError}
-      handleChange={handleChange}
-      handleBlur={handleBlur}
-      handleSubmit={handleSubmit}
-    />
+    <>
+      <SubmissionProgress formKey={formKey} label={t('saving')} />
+      <BookingPage
+        doctor={doctor}
+        t={t}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        selectedSlot={selectedSlot}
+        setSelectedSlot={setSelectedSlot}
+        formData={formData}
+        errors={errors}
+        touchedFields={touchedFields}
+        isFormValid={isFormValid}
+        createLoading={createLoading}
+        submitError={submitError}
+        handleChange={handleChange}
+        handleBlur={handleBlur}
+        handleSubmit={handleSubmit}
+      />
+    </>
   );
 }
 

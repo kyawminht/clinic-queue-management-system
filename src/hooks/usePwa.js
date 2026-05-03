@@ -48,7 +48,9 @@ export function usePwa() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    if (import.meta.env.DEV) {
+    const allowDevSw = String(import.meta.env.VITE_ENABLE_SW || '').toLowerCase() === 'true';
+
+    if (import.meta.env.DEV && !allowDevSw) {
       navigator.serviceWorker
         .getRegistrations()
         .then((registrations) => Promise.all(registrations.map((reg) => reg.unregister())))
@@ -105,9 +107,15 @@ export function usePwa() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subscription,
-          phone: currentUser?.phone || null,
+          phone: null,
         }),
       });
+
+      try {
+        window.localStorage.setItem('push_endpoint', subscription?.endpoint || '');
+      } catch {
+        // ignore
+      }
 
       setPushStatus('enabled');
     } catch (error) {

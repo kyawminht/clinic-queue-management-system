@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 const CACHE_NAME = 'clinic-booking-pwa-v1';
 const CORE_ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
+const IS_LOCAL_DEV = self.location.hostname === 'localhost' && self.location.port === '5173';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -23,6 +24,12 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
 
   if (request.method !== 'GET') return;
+
+  // In Vite dev, do not cache anything (avoid breaking HMR/WebSocket URLs).
+  if (IS_LOCAL_DEV) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   const url = new URL(request.url);
 
