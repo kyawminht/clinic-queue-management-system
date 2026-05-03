@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
+import { usePwa } from '../hooks/usePwa';
 
 const navigationItems = [
   { to: '/', key: 'navHome' },
@@ -8,6 +9,15 @@ const navigationItems = [
 
 function AppShell({ children }) {
   const { language, setLanguage, t } = useTranslation();
+  const {
+    canInstall,
+    promptInstall,
+    pushSupported,
+    notificationPermission,
+    pushStatus,
+    pushError,
+    enablePushNotifications,
+  } = usePwa();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(186,230,253,0.85),_transparent_45%),linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_42%,_#ffffff_100%)] text-slate-900">
@@ -19,6 +29,37 @@ function AppShell({ children }) {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:justify-end">
+              <div className="flex flex-wrap items-center gap-2">
+                {canInstall ? (
+                  <button
+                    type="button"
+                    onClick={promptInstall}
+                    className="min-h-[44px] rounded-2xl bg-white/95 px-4 text-sm font-black text-brand-700 shadow-sm transition hover:bg-white"
+                  >
+                    {t('installApp')}
+                  </button>
+                ) : null}
+
+                {pushSupported ? (
+                  <button
+                    type="button"
+                    onClick={enablePushNotifications}
+                    disabled={notificationPermission === 'granted' || pushStatus === 'enabling'}
+                    className="min-h-[44px] rounded-2xl bg-white/15 px-4 text-sm font-black text-white ring-1 ring-white/30 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {notificationPermission === 'granted' ? t('notificationsEnabled') : t('enableNotifications')}
+                  </button>
+                ) : (
+                  <span className="text-xs font-semibold text-white/80">{t('notificationsNotSupported')}</span>
+                )}
+              </div>
+
+              {pushError ? (
+                <div className="rounded-2xl bg-rose-500/15 px-4 py-2 text-xs font-bold text-rose-100 ring-1 ring-rose-200/30">
+                  {pushError}
+                </div>
+              ) : null}
+
               <div className="grid w-full grid-cols-2 gap-2 rounded-2xl bg-sky-100 p-1.5 sm:w-auto sm:min-w-[250px] sm:rounded-full">
                 <button
                   type="button"

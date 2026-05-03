@@ -20,7 +20,7 @@ function normalizeFieldValue(name, value) {
 function BookingPageContainer() {
   const { doctorId } = useParams();
   const navigate = useNavigate();
-  const { currentUser, setCurrentUser } = useAppContext();
+  const { currentUser, setCurrentUser, selectedDate, setSelectedDate } = useAppContext();
   const { doctors } = useDoctors();
   const { createAppointment, createLoading } = useAppointments();
   const { t } = useTranslation();
@@ -33,6 +33,7 @@ function BookingPageContainer() {
     phone: currentUser.phone || '',
   });
   const [touchedFields, setTouchedFields] = useState({});
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (doctor?.availableSlots?.length && !selectedSlot) {
@@ -105,6 +106,7 @@ function BookingPageContainer() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setSubmitError('');
 
     if (!doctor || !isFormValid) {
       setTouchedFields({
@@ -121,20 +123,31 @@ function BookingPageContainer() {
       phone: formData.phone.trim(),
     };
 
-    await createAppointment({
-      user: sanitizedFormData,
-      doctor,
-      slot: selectedSlot,
-    });
+    try {
+      await createAppointment({
+        date: selectedDate,
+        user: sanitizedFormData,
+        doctor,
+        slot: selectedSlot,
+      });
 
-    setCurrentUser(sanitizedFormData);
-    navigate('/status');
+      setCurrentUser(sanitizedFormData);
+      navigate('/status');
+    } catch (error) {
+      if (error?.code === 'ACTIVE_BOOKING_EXISTS') {
+        setSubmitError(t('activeBookingExists'));
+      } else {
+        setSubmitError(error?.message || 'Request failed');
+      }
+    }
   };
 
   return (
     <BookingPage
       doctor={doctor}
       t={t}
+      selectedDate={selectedDate}
+      setSelectedDate={setSelectedDate}
       selectedSlot={selectedSlot}
       setSelectedSlot={setSelectedSlot}
       formData={formData}
@@ -142,6 +155,7 @@ function BookingPageContainer() {
       touchedFields={touchedFields}
       isFormValid={isFormValid}
       createLoading={createLoading}
+      submitError={submitError}
       handleChange={handleChange}
       handleBlur={handleBlur}
       handleSubmit={handleSubmit}

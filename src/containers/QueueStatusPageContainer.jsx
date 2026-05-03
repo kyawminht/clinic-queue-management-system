@@ -4,8 +4,8 @@ import { useAppointments } from '../hooks/useAppointments';
 import { useTranslation } from '../hooks/useTranslation';
 
 function QueueStatusPageContainer() {
-  const { currentUser } = useAppContext();
-  const { appointments, currentServingQueueNumber } = useAppointments();
+  const { currentUser, selectedDate, setSelectedDate } = useAppContext();
+  const { appointments, currentServingQueueNumber, started } = useAppointments();
   const { t } = useTranslation();
 
   const latestAppointment =
@@ -17,6 +17,9 @@ function QueueStatusPageContainer() {
     <QueueStatusPage
       latestAppointment={latestAppointment}
       currentServingQueueNumber={currentServingQueueNumber}
+      started={started}
+      selectedDate={selectedDate}
+      setSelectedDate={setSelectedDate}
       t={t}
     />
   );

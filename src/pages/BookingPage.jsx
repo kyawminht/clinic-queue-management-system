@@ -3,6 +3,8 @@ import TimeSlotPicker from '../components/TimeSlotPicker';
 function BookingPage({
   doctor,
   t,
+  selectedDate,
+  setSelectedDate,
   selectedSlot,
   setSelectedSlot,
   formData,
@@ -10,6 +12,7 @@ function BookingPage({
   touchedFields,
   isFormValid,
   createLoading,
+  submitError,
   handleChange,
   handleBlur,
   handleSubmit,
@@ -28,6 +31,18 @@ function BookingPage({
         <div className="rounded-[28px] border border-brand-100 bg-brand-50 p-5">
           <p className="text-lg font-black text-brand-700">{t('bookingStep1')}</p>
           <p className="mt-3 text-base font-bold text-slate-800">{t('bookingStep2')}</p>
+        </div>
+
+        <div className="rounded-[28px] border border-white bg-white p-5 shadow-soft">
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-slate-700">{t('appointmentDate')}</span>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base font-semibold text-slate-900 outline-none transition focus:border-brand-500"
+            />
+          </label>
         </div>
 
         <div className="rounded-[28px] border border-white bg-white p-5 shadow-soft">
@@ -119,6 +134,11 @@ function BookingPage({
 
       <div className="fixed bottom-[84px] left-0 right-0 px-4">
         <div className="mx-auto max-w-6xl">
+          {submitError ? (
+            <div className="mb-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+              {submitError}
+            </div>
+          ) : null}
           <button
             type="submit"
             disabled={!isFormValid || createLoading}

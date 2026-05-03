@@ -12,6 +12,7 @@ const initialCurrentUser = {
 export function AppProvider({ children }) {
   const [language, setLanguage] = useState('my');
   const [currentUser, setCurrentUser] = useState(initialCurrentUser);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
 
@@ -22,8 +23,10 @@ export function AppProvider({ children }) {
       t,
       currentUser,
       setCurrentUser,
+      selectedDate,
+      setSelectedDate,
     }),
-    [currentUser, language]
+    [currentUser, language, selectedDate]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

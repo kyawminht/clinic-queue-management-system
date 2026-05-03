@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import DoctorCard from '../components/DoctorCard';
+import { useAppContext } from '../context/AppContext';
 
 function HomePage({ doctors, loading, t }) {
+  const { selectedDate, setSelectedDate } = useAppContext();
+
   return (
     <section className="space-y-5">
       <div className="rounded-[28px] bg-brand-600 p-6 text-white shadow-soft">
@@ -10,6 +13,18 @@ function HomePage({ doctors, loading, t }) {
       </div>
 
       <div className="grid gap-3">
+        <div className="rounded-[28px] border border-white bg-white p-5 shadow-soft">
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-slate-700">{t('appointmentDate')}</span>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base font-semibold text-slate-900 outline-none transition focus:border-brand-500"
+            />
+          </label>
+        </div>
+
         <div className="rounded-[28px] border border-brand-100 bg-white p-5 shadow-soft">
           <h3 className="text-lg font-black text-slate-900">{t('threeSteps')}</h3>
           <div className="mt-4 grid gap-3">

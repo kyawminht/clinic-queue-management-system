@@ -1,6 +1,10 @@
 import { getDoctorsSnapshot } from './doctorService';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const queueState = {
+  started: false,
+  startedAt: null,
   currentServingQueueNumber: 1,
   appointments: [
     {
@@ -36,9 +40,32 @@ function cloneAppointment(appointment) {
 
 function buildQueueSnapshot() {
   return {
+    started: queueState.started,
+    startedAt: queueState.startedAt,
     currentServingQueueNumber: queueState.currentServingQueueNumber,
     appointments: queueState.appointments.map(cloneAppointment),
   };
+}
+
+function syncQueueState(queue) {
+  queueState.started = Boolean(queue?.started);
+  queueState.startedAt = queue?.startedAt || null;
+  queueState.currentServingQueueNumber = queue.currentServingQueueNumber;
+  queueState.appointments = (queue.appointments || []).map(cloneAppointment);
+}
+
+async function parseApiResponse(response) {
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = data?.message || 'Request failed';
+    const error = new Error(message);
+    error.status = response.status;
+    error.code = data?.code;
+    throw error;
+  }
+
+  return data;
 }
 
 function getNextQueueNumber() {
@@ -67,41 +94,33 @@ export function getQueueSnapshot() {
   return buildQueueSnapshot();
 }
 
-export async function fetchQueueData() {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(buildQueueSnapshot()), 250);
-  });
+export async function fetchQueueData(dateKey) {
+  try {
+    const query = dateKey ? `?date=${encodeURIComponent(dateKey)}` : '';
+    const response = await fetch(`${API_BASE_URL}/bookings/queue${query}`);
+    const queue = await parseApiResponse(response);
+    syncQueueState(queue);
+    return buildQueueSnapshot();
+  } catch (error) {
+    return buildQueueSnapshot();
+  }
 }
 
 export async function submitAppointment(payload) {
-  const nextQueueNumber = getNextQueueNumber();
-  const waitMins = Math.max(nextQueueNumber - queueState.currentServingQueueNumber, 0) * 15;
-
-  const newAppointment = {
-    id: `apt-${Date.now()}`,
-    queueNumber: nextQueueNumber,
-    patientName: payload.user.name,
-    age: payload.user.age,
-    phone: payload.user.phone,
-    doctorId: payload.doctor.id,
-    doctorName: payload.doctor.name,
-    slot: payload.slot,
-    status: 'waiting',
-    estimatedWaitMinutes: waitMins,
-  };
-
-  queueState.appointments.push(newAppointment);
-
-  return new Promise((resolve) => {
-    setTimeout(
-      () =>
-        resolve({
-          appointment: cloneAppointment(newAppointment),
-          queue: buildQueueSnapshot(),
-        }),
-      250
-    );
+  const response = await fetch(`${API_BASE_URL}/bookings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
   });
+  const result = await parseApiResponse(response);
+  syncQueueState(result.queue);
+
+  return {
+    appointment: cloneAppointment(result.appointment),
+    queue: buildQueueSnapshot(),
+  };
 }
 
 export async function markCurrentDone() {
