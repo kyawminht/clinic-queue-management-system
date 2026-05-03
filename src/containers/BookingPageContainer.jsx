@@ -135,7 +135,8 @@ function BookingPageContainer() {
       navigate('/status');
     } catch (error) {
       if (error?.code === 'ACTIVE_BOOKING_EXISTS') {
-        setSubmitError(t('activeBookingExists'));
+        setCurrentUser(sanitizedFormData);
+        navigate('/status');
       } else {
         setSubmitError(error?.message || 'Request failed');
       }

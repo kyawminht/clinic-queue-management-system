@@ -24,6 +24,14 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
 
+  const url = new URL(request.url);
+
+  // Never cache API calls.
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // Navigation: network-first, fallback to cached index
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -94,4 +102,3 @@ self.addEventListener('notificationclick', (event) => {
     })()
   );
 });
-

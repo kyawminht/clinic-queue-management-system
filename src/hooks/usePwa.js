@@ -48,10 +48,16 @@ export function usePwa() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => setRegistration(reg))
-      .catch(() => null);
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((reg) => reg.unregister())))
+        .then(() => caches?.keys?.().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))))
+        .catch(() => null);
+      return;
+    }
+
+    navigator.serviceWorker.register('/sw.js').then((reg) => setRegistration(reg)).catch(() => null);
   }, []);
 
   useEffect(() => {
@@ -135,4 +141,3 @@ export function usePwa() {
 
   return state;
 }
-
