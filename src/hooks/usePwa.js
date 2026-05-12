@@ -41,25 +41,24 @@ export function usePwa() {
     typeof window !== 'undefined' &&
     'serviceWorker' in navigator &&
     'PushManager' in window &&
-    notificationsSupported;
+    notificationsSupported &&
+    Boolean(registration);
 
   const notificationPermission = notificationsSupported ? Notification.permission : 'denied';
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    const allowDevSw = String(import.meta.env.VITE_ENABLE_SW || '').toLowerCase() === 'true';
-
-    if (import.meta.env.DEV && !allowDevSw) {
-      navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => Promise.all(registrations.map((reg) => reg.unregister())))
-        .then(() => caches?.keys?.().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))))
-        .catch(() => null);
-      return;
-    }
-
-    navigator.serviceWorker.register('/sw.js').then((reg) => setRegistration(reg)).catch(() => null);
+    // Service workers can serve stale assets and cause confusing "validation" / API mismatch errors.
+    // This app now always unregisters SW to ensure fresh network behavior.
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((reg) => reg.unregister())))
+      .then(() => {
+        setRegistration(null);
+        return window?.caches?.keys?.().then((keys) => Promise.all(keys.map((key) => window.caches.delete(key))));
+      })
+      .catch(() => null);
   }, []);
 
   useEffect(() => {

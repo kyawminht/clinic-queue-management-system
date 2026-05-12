@@ -40,18 +40,7 @@ function AppShell({ children }) {
                   </button>
                 ) : null}
 
-                {pushSupported ? (
-                  <button
-                    type="button"
-                    onClick={enablePushNotifications}
-                    disabled={notificationPermission === 'granted' || pushStatus === 'enabling'}
-                    className="min-h-[44px] rounded-2xl bg-white/15 px-4 text-sm font-black text-white ring-1 ring-white/30 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {notificationPermission === 'granted' ? t('notificationsEnabled') : t('enableNotifications')}
-                  </button>
-                ) : (
-                  <span className="text-xs font-semibold text-white/80">{t('notificationsNotSupported')}</span>
-                )}
+             
               </div>
 
               {pushError ? (

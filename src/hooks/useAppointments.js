@@ -28,7 +28,7 @@ export function useAppointments() {
   const { t } = useTranslation();
   const { selectedDate } = useAppContext();
   const isOnline = useOnlineStatus();
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isFetching, error } = useQuery({
     queryKey: [...queryKeys.queue, selectedDate],
     queryFn: () => fetchQueueData(selectedDate),
     initialData: getQueueSnapshot,
@@ -94,5 +94,6 @@ export function useAppointments() {
     createLoading: createAppointmentMutation.isPending,
     createError: createAppointmentMutation.error || error,
     loading: isLoading,
+    fetching: isFetching,
   };
 }

@@ -1,4 +1,5 @@
 import TimeSlotPicker from '../components/TimeSlotPicker';
+import { getTodayDateKey } from '../services/dateKey';
 
 function BookingPage({
   doctor,
@@ -25,6 +26,8 @@ function BookingPage({
     );
   }
 
+  const minDate = getTodayDateKey();
+
   return (
     <form onSubmit={handleSubmit} className="pb-28">
       <section className="space-y-5">
@@ -39,7 +42,11 @@ function BookingPage({
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              min={minDate}
+              onChange={(e) => {
+                const next = e.target.value;
+                setSelectedDate(next && next < minDate ? minDate : next);
+              }}
               className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base font-semibold text-slate-900 outline-none transition focus:border-brand-500"
             />
           </label>

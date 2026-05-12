@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
+import { getTodayDateKey } from '../services/dateKey';
 
 function QueueStatusPage({
   latestAppointment,
@@ -8,10 +9,21 @@ function QueueStatusPage({
   selectedDate,
   setSelectedDate,
   t,
+  isOnline,
+  loading,
+  fetching,
 }) {
+  const showSyncing = Boolean(loading || fetching);
+  const minDate = getTodayDateKey();
+
   if (!latestAppointment) {
     return (
       <section className="rounded-[28px] bg-white p-6 shadow-soft">
+        {!isOnline ? (
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            You&apos;re offline. Submissions will queue and retry when back online.
+          </div>
+        ) : null}
         <h2 className="text-2xl font-black text-slate-900">{t('noAppointment')}</h2>
         <Link
           to="/"
@@ -26,6 +38,11 @@ function QueueStatusPage({
   if (latestAppointment.status === 'done') {
     return (
       <section className="space-y-5">
+        {!isOnline ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            You&apos;re offline. Submissions will queue and retry when back online.
+          </div>
+        ) : null}
         <div className="rounded-[32px] bg-emerald-600 p-6 text-white shadow-soft">
           <p className="text-sm font-semibold text-emerald-50">{t('thankYou')}</p>
           <h2 className="mt-2 text-2xl font-black">{t('statusDone')}</h2>
@@ -49,13 +66,38 @@ function QueueStatusPage({
 
   return (
     <section className="space-y-5">
+      {!isOnline ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+          You&apos;re offline. Submissions will queue and retry when back online.
+        </div>
+      ) : null}
+
+      {showSyncing ? (
+        <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
+          <p className="text-sm font-black text-sky-900">{t('loading')}</p>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-sky-100">
+            <div className="h-full w-1/2 animate-[progress_1.2s_ease-in-out_infinite] rounded-full bg-brand-600" />
+          </div>
+          <style>{`
+            @keyframes progress {
+              0% { transform: translateX(-100%); }
+              100% { transform: translateX(200%); }
+            }
+          `}</style>
+        </div>
+      ) : null}
+
       <div className="rounded-[28px] border border-white bg-white p-5 shadow-soft">
         <label className="block">
           <span className="mb-2 block text-sm font-bold text-slate-700">{t('appointmentDate')}</span>
           <input
             type="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            min={minDate}
+            onChange={(e) => {
+              const next = e.target.value;
+              setSelectedDate(next && next < minDate ? minDate : next);
+            }}
             className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-base font-semibold text-slate-900 outline-none transition focus:border-brand-500"
           />
         </label>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { translations } from '../services/translations';
+import { getTodayDateKey } from '../services/dateKey';
 
 const AppContext = createContext(null);
 
@@ -12,7 +13,12 @@ const initialCurrentUser = {
 export function AppProvider({ children }) {
   const [language, setLanguage] = useState('my');
   const [currentUser, setCurrentUser] = useState(initialCurrentUser);
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [selectedDate, setSelectedDate] = useState(() => getTodayDateKey());
+
+  const setSelectedDateSafe = (next) => {
+    const minDate = getTodayDateKey();
+    setSelectedDate(next && next < minDate ? minDate : next);
+  };
 
   const t = (key) => translations[language]?.[key] || translations.en[key] || key;
 
@@ -24,7 +30,7 @@ export function AppProvider({ children }) {
       currentUser,
       setCurrentUser,
       selectedDate,
-      setSelectedDate,
+      setSelectedDate: setSelectedDateSafe,
     }),
     [currentUser, language, selectedDate]
   );

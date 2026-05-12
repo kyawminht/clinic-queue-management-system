@@ -126,6 +126,31 @@ function BookingPageContainer() {
       phone: formData.phone.trim(),
     };
 
+    const handleSubmissionError = (error) => {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Booking submit failed:', error);
+      }
+
+      if (error?.code === 'ACTIVE_BOOKING_EXISTS') {
+        setCurrentUser(sanitizedFormData);
+        navigate('/status');
+        return;
+      }
+
+      if (error?.code === 'QUEUE_NOT_STARTED') {
+        setSubmitError(t('doctorNotStartedHint'));
+        return;
+      }
+
+      if (error?.status === 400) {
+        setSubmitError(error?.message || t('validationGeneric'));
+        return;
+      }
+
+      setSubmitError(error?.message || 'Request failed');
+    };
+
     try {
       const result = await submit({
         date: selectedDate,
@@ -134,12 +159,17 @@ function BookingPageContainer() {
         slot: selectedSlot,
       }, { title: sanitizedFormData.name });
 
+      if (result?.error) {
+        handleSubmissionError(result.error);
+        return;
+      }
+
       setCurrentUser(sanitizedFormData);
       if (!result?.queued) {
         navigate('/status');
       }
     } catch (error) {
-      setSubmitError(error?.message || 'Request failed');
+      handleSubmissionError(error);
     }
   };
 
